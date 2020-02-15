@@ -9,8 +9,9 @@ namespace Shit
       | Tag    of TagInfo
 
     and CommitInfo =
-      { parents:   Ref list
-        hash:      Ref
+      { tree:      Ref
+        parents:   Ref list
+        author:    Author
         committer: Author
         message:   string
       }
@@ -59,9 +60,26 @@ namespace Shit
     and FileName = 
       | Name of string
 
+    module Author =
+      let make name email =
+        { name  = AuthorName.Name name
+          email = Email email
+        }
+
     module Object =
       let blob contents =
-        Object.Blob { contents = contents }
+        Object.Blob <|
+        { contents = contents }
 
       let tree entries =
-        Object.Tree { contents = entries }
+        Object.Tree <|
+        { contents = entries }
+
+      let commit tree parents author committer message =
+        Object.Commit <|
+        { tree      = tree
+          parents   = parents
+          author    = author
+          committer = committer
+          message   = message
+        }

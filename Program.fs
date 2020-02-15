@@ -1,6 +1,5 @@
 ﻿open System
 open System.IO
-open ICSharpCode.SharpZipLib.Zip.Compression.Streams
 
 open FParsec
 open Shit
@@ -10,19 +9,15 @@ let main argv =
     let blobData = 
         "blob 16\000.ionide\nobj\nbin\n"
 
-    let uncompress path =
-        let treeObjectFile = FileInfo(path)
-        use stream = treeObjectFile.OpenRead ()
-        use inflater = new InflaterInputStream(stream)
-        let buffer = new MemoryStream ()
-        inflater.CopyTo(buffer)
-        buffer.Position <- 0L
+    let aTree = "8b902e68847c2ec430f2a714269e38129f58734e"
+    let tree = "3d4b6642df72c0bea4a34e07a12c1aded995034f"
+    let commit = "176f9e4a716174406909d2dd547b66ea5d1d54d7"
 
-        buffer
+    use stream = 
+        Database.uncompress 
+        <| Database.defaultObjectPath commit
 
-    use stream = uncompress ".git/objects/8b/902e68847c2ec430f2a714269e38129f58734e"
-
-    match runParserOnStream ObjectParser.tree () "" stream Encodings.Identity with
+    match runParserOnStream ObjectParser.object () "" stream Encodings.Identity with
     | Success (r, _, _) ->
         printfn "Result: `%A`" r
     | error ->

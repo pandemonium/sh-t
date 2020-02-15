@@ -4,16 +4,15 @@ namespace Shit
   open FParsec
 
   module ObjectParser =
-    let nilChar = pchar '\000'
-    let space   = pchar ' '
+    let nilChar     = pchar '\000'
+    let space       = pchar ' '
+    let lessThan    = pchar '<'
+    let greaterThan = pchar '>'
 
     let content length = anyString length
 
     let objectHeader name =
       skipString name >>. space >>. pint32 .>> nilChar
-
-    let blob =
-      objectHeader "blob" >>= content
 
     let bounded length (p: Parser<'a, 'b>) : Parser<'a, 'b> =
       fun input ->
@@ -52,15 +51,59 @@ namespace Shit
     let treeContent length =
       many1 treeEntry
 
-    let tree =
-      objectHeader "tree"
-      >>= treeContent
+    let treeObject =
+      objectHeader "tree" >>= treeContent
       |>> Domain.Object.tree
 
-    let object =
-      blob |>> Domain.Object.blob
+    let labeledRef name =
+      skipString name >>. space >>. many1Satisfy isHex
+      |>> Domain.Sha1Hash
 
-    run blob "" |> ignore
+    let parent =
+      labeledRef "parent"
+
+    let parents =
+      many parent
+
+    let authorName =
+      many1CharsTill anyChar lessThan
+
+    let email =
+      many1CharsTill anyChar greaterThan
+
+    let authorDecl label = 
+      skipString label 
+      >>. pipe2 authorName email Domain.Author.make
+      .>> skipMany1Till anyChar newline
+
+    let author    = authorDecl "author"
+    let committer = authorDecl "committer"
+
+    let commitContent length = parse {
+      let! tree      = labeledRef "tree" .>> newline
+      let! parents   = parents .>> newline
+      let! author    = author
+      let! committer = committer .>> newline
+      let! message   = many1Chars anyChar
+
+      return Domain.Object.commit tree parents author committer message
+    }
+
+    let commitObject =
+      objectHeader "commit" >>= commitContent
+
+    let blobObject =
+      objectHeader "blob" >>= content
+      |>> Domain.Object.blob
+
+    let object =
+      [ blobObject
+        treeObject
+        commitObject
+      ]
+      |> choice
+
+    run object "" |> ignore
 
   module Codec =
     type Data = char array
