@@ -7,8 +7,9 @@
   <ItemGroup>
     <Compile Include="Encodings.fs" />
     <Compile Include="Domain.fs" />
+    <Compile Include="ObjectParser.fs" />
     <Compile Include="Database.fs" />
-    <Compile Include="Codec.fs" />
+    <Compile Include="CommandLine.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <Import Project=".paket\Paket.Restore.targets" />

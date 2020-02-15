@@ -17,7 +17,7 @@ namespace Shit
       }
 
     and TreeInfo =
-      { contents: TreeEntry list
+      { entries: TreeEntry list
       }
 
     and BlobInfo =
@@ -60,6 +60,9 @@ namespace Shit
     and FileName = 
       | Name of string
 
+    module TreeEntry =
+      let name (TreeEntryInfo (_, Name name, _)) = name
+
     module Author =
       let make name email =
         { name  = AuthorName.Name name
@@ -73,11 +76,11 @@ namespace Shit
 
       let tree entries =
         Object.Tree <|
-        { contents = entries }
+        { entries = entries }
 
       let commit tree parents author committer message =
-        Object.Commit <|
-        { tree      = tree
+        Object.Commit {
+          tree      = tree
           parents   = parents
           author    = author
           committer = committer

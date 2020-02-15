@@ -21,24 +21,24 @@ namespace Shit
         p input'
 
     let fileMode =
-      many1Satisfy isDigit 
+      many1Satisfy isDigit .>> space
       |>> Domain.FileMode
 
     let fileName =
       many1Satisfy ((<>) '\000') .>> nilChar
       |>> Domain.FileName.Name
 
-    let formatByte b =
-        sprintf "%02x" b
+    let formatByte =
+      sprintf "%02x"
 
     let formatHexString =
-        Array.map formatByte
-        >> String.concat ""
+      Array.map formatByte
+      >> String.concat ""
 
     let binaryHexString count = 
-        anyString count
-        |>> Encodings.Identity.GetBytes
-        |>> formatHexString
+      anyString count
+      |>> Encodings.Identity.GetBytes
+      |>> formatHexString
 
     let ref =
       binaryHexString 20
@@ -105,22 +105,4 @@ namespace Shit
 
     run object "" |> ignore
 
-  module Codec =
-    type Data = char array
-    type DecodeResult = 
-      Result<Domain.Object, DecodeError>
-    and DecodeError =
-      | Omgwtfbbq of string
-
-    module DecodeResult =
-      let omgwtfbbq =
-        Omgwtfbbq >>  Result.Error
-
-    let encodeObject object : Data = 
-      [| '\000' |]
-
-    let tryDecodeObject (data: Data) : DecodeResult =
-      data |> ignore
-
-      "Write the code"
-      |> DecodeResult.omgwtfbbq
+//  let parseObject 
