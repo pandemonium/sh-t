@@ -1,4 +1,4 @@
-namespace shit
+namespace Shit
 
   module Domain =
 
@@ -9,19 +9,33 @@ namespace shit
       | Tag    of TagInfo
 
     and CommitInfo =
-      { parents:   Hash list
-        hash:      Hash
+      { parents:   Ref list
+        hash:      Ref
         committer: Author
         message:   string
       }
 
-    and TagInfo =
-      { object: Hash
-        type: ObjectType
-        tag: TagName
-        tagger: Author
-        message: string
+    and TreeInfo =
+      { contents: TreeEntry list
       }
+
+    and BlobInfo =
+      { contents: string 
+      }
+
+    and TagInfo =
+      { object:     Ref
+        objectType: ObjectType
+        tag:        TagName
+        tagger:     Author
+        message:    string
+      }
+
+    and TreeEntry = 
+      | TreeEntryInfo of FileMode * FileName * Ref
+
+    and Ref = 
+      | Sha1Hash of string
 
     and TagName = Name of string
 
@@ -29,31 +43,25 @@ namespace shit
       | Commit
 
     and Author =
-      { name:  Name
+      { name:  AuthorName
         email: ElectronicAddress
       }
+
+    and AuthorName =
+      Name of string
 
     and ElectronicAddress = 
       | Email of string
 
-    and TreeInfo =
-      { contents: TreeEntry list
-      }
+    and FileMode = 
+      | FileMode of string
 
-    and TreeEntry =
-      | Tree of TreeEntryInfo
-      | Blob of TreeEntryInfo
-
-    and TreeEntryInfo = FileMode * Hash * Name
-
-    and FileMode = int
-
-    and Hash = 
-      | Sha1 of string
-
-    and Name = 
+    and FileName = 
       | Name of string
 
-    and BlobInfo =
-      { contents: string 
-      }
+    module Object =
+      let blob contents =
+        Object.Blob { contents = contents }
+
+      let tree entries =
+        Object.Tree { contents = entries }

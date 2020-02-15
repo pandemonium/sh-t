@@ -1,3 +1,7 @@
 .ionide
 obj
 bin
+paket-files
+tasks.json
+.vscode
+.paket
